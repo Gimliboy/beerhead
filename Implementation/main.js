@@ -4,68 +4,16 @@
         renderer,
         camera,
         model,                              // Our character
-        neck,                               // Reference to the neck bone in the skeleton
-        waist,                               // Reference to the waist bone in the skeleton
-        possibleAnims,                      // Animations found in our file
         mixer,                              // THREE.js animations mixer
         idle,                               // Idle, the default state our character returns to
         run,                                // run animation
         clock = new THREE.Clock(),          // Used for anims, which run to a clock instead of frame rate 
-        currentlyAnimating = false,         // Used to check whether characters neck is being used in another anim
-        raycaster = new THREE.Raycaster(),  // Used to detect the click on our character
         loaderAnim = document.getElementById('js-loader');
 
-
-
-
     init()
-
-
-
-
     function init() {
 
 
-        // Base model Path
-        const BASE_MODEL_PATH = './Models/'
-
-        // Beerhead
-        const BEERHEAD_PATH = BASE_MODEL_PATH + 'Characters/Beerhead/beerhead.glb'
-
-        let loader = new THREE.GLTFLoader()
-
-        loader.load(
-            BEERHEAD_PATH,
-            function (gltf) {
-                model = gltf.scene
-                let animations = gltf.animations
-                model.traverse(o => {
-                    if (o.isMesh) {
-                        o.castShadow = true;
-                        o.receiveShadow = true;
-                    }
-                });
-                model.scale.set(7, 7, 7);
-                model.position.y = -11;
-                scene.add(model)
-                loaderAnim.remove()
-                mixer = new THREE.AnimationMixer(model)
-                console.log(animations)
-                // get the idle animation
-                let idleAnim = THREE.AnimationClip.findByName(animations, 'Idle');
-                let runAnim = THREE.AnimationClip.findByName(animations, 'Run');
-                run = mixer.clipAction(runAnim)
-                idle = mixer.clipAction(idleAnim);
-                idle.play();
-
-                document.addEventListener('keydown', () => { idle.stop(); run.play() })
-                document.addEventListener('keyup', () => { run.stop(); idle.play(); })
-            },
-            undefined, // We don't need this function
-            function (error) {
-                console.error(error);
-            }
-        );
 
         const canvas = document.querySelector('#main-scene')
 
@@ -121,6 +69,73 @@
         floor.receiveShadow = true;
         floor.position.y = -11;
         scene.add(floor);
+        
+        // Base model Path
+        const BASE_MODEL_PATH = './Models/'
+
+        // Beerhead
+        const BEERHEAD_PATH = BASE_MODEL_PATH + 'Characters/Beerhead/beerhead.glb'
+
+        let loader = new THREE.GLTFLoader()
+
+        loader.load(
+            BEERHEAD_PATH,
+            function (gltf) {
+                model = gltf.scene
+                let animations = gltf.animations
+                model.traverse(o => {
+                    if (o.isMesh) {
+                        o.castShadow = true;
+                        o.receiveShadow = true;
+                    }
+                });
+                let modelDirection = "r"
+                model.scale.set(7, 7, 7);
+                model.position.y = -11;
+                scene.add(model)
+                loaderAnim.remove()
+                mixer = new THREE.AnimationMixer(model)
+                console.log(animations)
+                // get the idle and run animation
+                let idleAnim = THREE.AnimationClip.findByName(animations, 'Idle');
+                let runAnim = THREE.AnimationClip.findByName(animations, 'Run');
+                run = mixer.clipAction(runAnim)
+                idle = mixer.clipAction(idleAnim);
+                idle.play();
+
+                document.addEventListener('keydown', (event) => {
+                    if (event.defaultPrevented)
+                        return;
+
+                    switch (event.key) {
+                        case "ArrowRight":
+                            if (modelDirection != "r") {
+                                model.rotation.y = - 2 * Math.PI;
+                                modelDirection = "r"
+                            }
+                            idle.stop()
+                            run.play()
+                            break;
+                        case "ArrowLeft":
+                            if (modelDirection != "l") {
+                                model.rotation.y = Math.PI;
+                                modelDirection = "l"
+                            }
+                            idle.stop()
+                            run.play()
+                            break;
+                        default:
+                            return;
+                    }
+                    event.preventDefault();
+                })
+                document.addEventListener('keyup', () => { run.stop(); idle.play(); })
+            },
+            undefined, // We don't need this function
+            function (error) {
+                console.error(error);
+            }
+        );
     }
 
     // runs every frame and updates the scene
