@@ -6,3 +6,6 @@ Contains the Source Code for integrating the model into a js-program. ThreeJS-lo
 
 # Models
 Contains the concept drawings and the model, created with blender. The character will be rigged and defined with some animations.
+
+# Usage
+Use a live server, e.g. with the live server Plugin in VS Code. Essential since the model is stored locally.
